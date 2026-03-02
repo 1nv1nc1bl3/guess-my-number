@@ -1,14 +1,30 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const generateSecretNumber = () => Math.trunc(Math.random() * 20) + 1;
 export function useGuess() {
     // States
     const [score, setScore] = useState(20);
-    const [highScore, setHighScore] = useState(0);
+    const [highScore, setHighScore] = useState(() => {
+        const saved = localStorage.getItem('high-score:v1');
+        let initialValue;
+        if (!saved) return [];
+        try {
+            initialValue = JSON.parse(saved);
+        } catch (error) {
+            console.error(error);
+            return [];
+        }
+        return initialValue || [];
+    });
     const [secretNumber, setSecretNumber] = useState(generateSecretNumber());
     const [guess, setGuess] = useState('');
     const [message, setMessage] = useState('Start guessing...');
     const [gameStatus, setGameStatus] = useState('playing');
+
+    // Effects
+    useEffect(() => {
+        localStorage.setItem('high-score:v1', JSON.stringify(highScore));
+    }, [highScore]);
 
     // Constants
     const numericGuess = Number(guess);
